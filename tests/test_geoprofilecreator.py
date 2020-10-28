@@ -18,7 +18,8 @@ def test_dijktrajecten():
     )
 
     geoprofilecreator.execute()
-    print(geoprofilecreator.log)
+    geoprofilecreator.save_log(os.path.join(ROOT_DIR, "data/geoprofiel/creator.log"))    
+
     
 
 
