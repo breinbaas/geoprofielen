@@ -21,7 +21,7 @@ import math
 from enum import IntEnum
 
 from .soillayer import SoilLayer
-from ..settings import HDSR_SOIL_COLORS
+from ..settings import HDSR_SOIL_COLORS, DEFAULT_MINIMUM_LAYERHEIGHT
 
 class ConversionType(IntEnum):
     THREE_TYPE_RULE = 0
@@ -30,7 +30,6 @@ class ConversionType(IntEnum):
 
 RF_MAX = 10.
 QC_MAX = 50.
-DEFAULT_MINIMUM_LAYERHEIGHT = 0.2
 
 GEF_COLUMN_Z = 1
 GEF_COLUMN_QC = 2
