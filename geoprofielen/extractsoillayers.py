@@ -1,7 +1,7 @@
 # achterhalen van alle gebruikte grondsoortnamen in de boringen
 
-from helpers import case_insensitive_glob
-from objects.borehole import Borehole
+from geoprofielen.helpers import case_insensitive_glob
+from geoprofielen.objects.borehole import Borehole
 
 
 if __name__ == "__main__":

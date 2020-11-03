@@ -27,7 +27,7 @@ from ..settings import DEFAULT_CHAINAGE_STEP, MAX_CPT_DISTANCE, MAX_BOREHOLE_DIS
 class GeoProfileCreator(BaseModel):    
     cpt_path: str
     borehole_path: str    
-    dijktraject: DijkTraject
+    dijktraject: DijkTraject = None
 
     _cpts: List[CPT] = []
     _boreholes: List[Borehole] = []
@@ -100,6 +100,7 @@ class GeoProfileCreator(BaseModel):
             point = self.dijktraject.chainage_to_xy(ch)
             point.chainage = ch
             result.points.append(point)
+            
             # find closest CPT but always within MAX_CPT_DISTANCE
             usecpt, dlmin = None, 1e9
             for cpt in self._cpts:                
@@ -110,13 +111,34 @@ class GeoProfileCreator(BaseModel):
                     dlmin = dl
                     usecpt = cpt
 
+            # find closest borehole but always within MAX_BOREHOLE_DISTANCE
+            useborehole, dlmin = None, 1e9
+            for borehole in self._boreholes:                
+                dx = borehole.x - point.x
+                dy = borehole.y - point.y
+                dl = math.sqrt(dx**2 + dy**2)
+                if dl < MAX_BOREHOLE_DISTANCE and dl < dlmin:
+                    dlmin = dl
+                    useborehole = borehole
+            
+            
             if usecpt:
-                result.soilprofiles.append(Soilprofile(
+                soilprofile = Soilprofile(
                     x_left = left,
                     x_right = right,
                     source = str(usecpt.filename),
-                    soillayers = usecpt.soillayers)
-                )
+                    soillayers = usecpt.soillayers
+                )           
+
+                # kunnen we dit combinberen met een borehole?
+                if useborehole:
+                    soilprofile.add(useborehole.soillayers)
+
+                result.soilprofiles.append(soilprofile)
+
+
+        # find all soillayers based on boreholes
+
 
         result.merge()
         return result

@@ -5,8 +5,8 @@ import pandas as pd
 
 from settings import ROOT_DIR
 from helpers import case_insensitive_glob
-from objects.cpt import CPT
-from objects.borehole import Borehole
+from geoprofielen.objects.cpt import CPT
+from geoprofielen.objects.borehole import Borehole
 
 MAX_DIST = 20
 

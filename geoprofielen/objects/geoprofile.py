@@ -1,3 +1,12 @@
+__author__ = "Breinbaas | Rob van Putten"
+__copyright__ = "Copyright 2020"
+__credits__ = ["Rob van Putten"]
+__license__ = "GPL"
+__version__ = "0.1.0"
+__maintainer__ = "Rob van Putten"
+__email__ = "breinbaasnl@gmail.com"
+__status__ = "Development"
+
 from pydantic import BaseModel
 from typing import List
 from pathlib import Path

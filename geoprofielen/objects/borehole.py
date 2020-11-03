@@ -196,8 +196,8 @@ class Borehole(BaseModel):
             soilcode = soilcode.replace(" ", "_")
 
             self.soillayers.append(SoilLayer(
-                z_bottom = z_bottom,
-                z_top = z_top,
+                z_bottom = round(z_bottom,2),
+                z_top = round(z_top,2),
                 soilcode = soilcode
             ))
         except Exception as e:

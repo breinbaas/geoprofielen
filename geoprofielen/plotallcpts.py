@@ -1,7 +1,7 @@
 # achterhalen van alle gebruikte grondsoortnamen in de boringen
 
-from helpers import case_insensitive_glob
-from objects.cpt import CPT
+from geoprofielen.helpers import case_insensitive_glob
+from geoprofielen.objects.cpt import CPT
 from tqdm import tqdm
 
 

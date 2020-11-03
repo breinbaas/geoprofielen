@@ -1,9 +1,9 @@
 # achterhalen van alle gebruikte grondsoortnamen in de boringen
 
 import os
-from helpers import case_insensitive_glob
-from settings import ROOT_DIR
-from objects.borehole import Borehole
+from geoprofielen.helpers import case_insensitive_glob
+from geoprofielen.settings import ROOT_DIR
+from geoprofielen.objects.borehole import Borehole
 from tqdm import tqdm
 
 f = open(os.path.join(ROOT_DIR,"tests/testdata/out/unknown_borehole_codes.csv"), 'w')

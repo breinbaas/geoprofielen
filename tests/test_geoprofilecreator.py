@@ -9,7 +9,7 @@ def test_dijktrajecten():
     dijktrajecten = dbc.get_dijktrajecten()
 
     # test met 237B1
-    dijktraject = dijktrajecten['237B1']
+    dijktraject = dijktrajecten['126']
 
     geoprofilecreator = GeoProfileCreator(
         cpt_path = os.path.join(ROOT_DIR, "data/sonderingen"),
