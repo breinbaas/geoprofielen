@@ -8,7 +8,7 @@ def test_dijktrajecten():
     dbc = DBConnector()
     dijktrajecten = dbc.get_dijktrajecten()
 
-    # test met 237B1
+    # test met 126
     dijktraject = dijktrajecten['126']
 
     geoprofilecreator = GeoProfileCreator(
