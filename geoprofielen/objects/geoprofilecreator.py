@@ -130,13 +130,14 @@ class GeoProfileCreator(BaseModel):
                 soilprofile = Soilprofile(
                     x_left = left,
                     x_right = right,
-                    source = str(usecpt.filename),
+                    source = str(Path(usecpt.filename).stem),
                     soillayers = usecpt.soillayers
                 )           
 
                 # kunnen we dit combinberen met een borehole?
                 if useborehole:
                     soilprofile.add(useborehole.soillayers)
+                    soilprofile.source += f" + {str(Path(useborehole.filename).stem)}"
 
                 result.soilprofiles.append(soilprofile)
 

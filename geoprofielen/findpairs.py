@@ -2,8 +2,11 @@ import os
 from tqdm import tqdm
 import math
 import pandas as pd
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+from pathlib import Path
 
-from settings import ROOT_DIR
+from settings import ROOT_DIR, HDSR_SOIL_COLORS
 from helpers import case_insensitive_glob
 from geoprofielen.objects.cpt import CPT
 from geoprofielen.objects.borehole import Borehole
@@ -60,7 +63,57 @@ if __name__ == "__main__":
             else:
                 finaldata = pd.concat([finaldata, data], axis=0)
 
+            # now we're here let's also plot the boreholedata and cpt's to see the difference in borehole vs cpt interpretation
+            fig = plt.figure(figsize=(6, 10))
+            ax = fig.add_subplot()
+            data = cpt.as_dataframe()
+            data.plot(x='qc',y='z', ax=ax, label='qc [MPa]')
+            data['Rf'] = 50. - data['Rf']
+            data.plot(x='Rf',y='z', ax=ax, label='Rf [%]')
+            cpt.convert()
+            
+            ax.text(1, cpt.soillayers[0].z_top + 1.0, Path(cpt.filename).stem)
+            for soillayer in cpt.soillayers:
+                facecolor = HDSR_SOIL_COLORS[soillayer.soilcode]
+                ax.add_patch(
+                    patches.Rectangle(
+                        (0, soillayer.z_bottom),
+                        25,
+                        soillayer.height,
+                        fill=True,
+                        facecolor=facecolor,
+                    )
+                )
+
+            ax.text(41, borehole.soillayers[0].z_top + 1.0, Path(borehole.filename).stem)
+            for soillayer in borehole.soillayers:
+                facecolor = HDSR_SOIL_COLORS[soillayer.soilcode]
+                ax.add_patch(
+                    patches.Rectangle(
+                        (25, soillayer.z_bottom),
+                        25,
+                        soillayer.height,
+                        fill=True,
+                        facecolor=facecolor,
+                    )
+                )
+            
+            ax.grid(which="both")  
+            zmax = max([sl.z_top for sl in cpt.soillayers] + [sl.z_top for sl in borehole.soillayers])          
+            zmin = min([sl.z_bottom for sl in cpt.soillayers] + [sl.z_bottom for sl in borehole.soillayers])          
+            ax.set_xlim(0,50)
+            ax.set_ylim(zmin - 1.0, zmax + 3.0)
+            name = f"{Path(cpt.filename).stem}_{Path(borehole.filename).stem}"
+
+            dist = math.sqrt(math.pow(borehole.x - cpt.x, 2) + math.pow(borehole.y - cpt.y, 2))
+
+            plt.title(f"{name} distance={dist:0.2f}m")
+            plt.savefig(os.path.join(ROOT_DIR,f"data/machinelearning/{name}.png"))
+            plt.close()
+
         except Exception as e:
             print(e)
 
     finaldata.to_csv(os.path.join(ROOT_DIR,"data/machinelearning/alldata.csv"))
+
+    

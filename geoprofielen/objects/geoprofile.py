@@ -55,7 +55,7 @@ class Geoprofile(BaseModel):
             if len(newsoilprofiles) == 0:
                 newsoilprofiles.append(sp)
             else:
-                if sp.source == newsoilprofiles[-1].source and sp.x_left == newsoilprofiles[-1].x_right:
+                if sp.soillayers == newsoilprofiles[-1].soillayers and sp.x_left == newsoilprofiles[-1].x_right:
                     newsoilprofiles[-1].x_right = sp.x_right
                 else:
                     newsoilprofiles.append(sp)
@@ -79,10 +79,11 @@ class Geoprofile(BaseModel):
                     )   
                 )
 
-                ax.text(soilprofile.x_mid, self.z_top + 1.0, Path(soilprofile.source).name, rotation=90)
+                ax.text(soilprofile.x_mid, self.z_top + 1.0, soilprofile.source, rotation=90)
 
         ax.set_xlim(self.points[0].chainage, self.points[-1].chainage)
         ax.set_ylim(self.z_bottom - 1.0, self.z_top + 5.0)
         plt.grid(which="both")
         plt.title(f"{self.name} ({self.id})")
         plt.savefig(filename)
+        plt.close()
