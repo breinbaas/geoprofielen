@@ -32,6 +32,7 @@ class GeoProfileCreator(BaseModel):
     _cpts: List[CPT] = []
     _boreholes: List[Borehole] = []
     _log: List[str] = []
+    is_dirty: bool = True
 
     @property
     def log(self) -> List[str]:
@@ -81,8 +82,11 @@ class GeoProfileCreator(BaseModel):
 
         # TODO > geoprofile als aparte class maken en veel van de code daarheen verplaatsen..
         self._log.append("[i] Reading data...")
-        self._read_cpts()
-        self._read_boreholes()
+
+        if self.is_dirty:
+            self._read_cpts()
+            self._read_boreholes()
+            self.is_dirty = False
         
         self._log.append("[i] Matching reference line with available cpts / borehole...")
         

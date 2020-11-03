@@ -79,10 +79,10 @@ class Geoprofile(BaseModel):
                     )   
                 )
 
-                ax.text(soilprofile.x_left, self.z_top + 1.0, Path(soilprofile.source).name)
+                ax.text(soilprofile.x_mid, self.z_top + 1.0, Path(soilprofile.source).name, rotation=90)
 
-        ax.set_xlim(self.x_left, self.x_right)
-        ax.set_ylim(self.z_bottom - 1.0, self.z_top + 2.0)
+        ax.set_xlim(self.points[0].chainage, self.points[-1].chainage)
+        ax.set_ylim(self.z_bottom - 1.0, self.z_top + 5.0)
         plt.grid(which="both")
         plt.title(f"{self.name} ({self.id})")
         plt.savefig(filename)

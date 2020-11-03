@@ -35,6 +35,10 @@ class Soilprofile(BaseModel):
     def width(self) -> float:
         return self.x_right - self.x_left
 
+    @property
+    def x_mid(self) -> float:
+        return (self.x_left + self.x_right) / 2.
+
     def _merge(self) -> None:
         for i, sl in enumerate(self.soillayers):
             if sl.height < DEFAULT_MINIMUM_LAYERHEIGHT:
