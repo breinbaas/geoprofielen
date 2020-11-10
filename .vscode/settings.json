@@ -1,5 +1,4 @@
 {
-    "python.pythonPath": "env/bin/python3.8",
     "python.testing.pytestArgs": [
         "tests"
     ],

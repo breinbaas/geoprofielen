@@ -27,6 +27,7 @@ class ConversionType(IntEnum):
     THREE_TYPE_RULE = 0
     SBT_DUTCH_NON_NORMALIZED = 1
     SBT_DUTCH_NORMALIZED = 2
+    NEN_5104 = 3
 
 RF_MAX = 10.
 QC_MAX = 50.
@@ -36,6 +37,22 @@ GEF_COLUMN_QC = 2
 GEF_COLUMN_FS = 3
 GEF_COLUMN_U = 6
 GEF_COLUMN_Z_CORRECTED = 11
+
+NEN5140 = [
+    ['veen',8.1], # immediate translation to HDSR soils
+        ['veen',5],
+        ['klei_humeus',4],
+        ['klei_humeus',3.3],
+        ['klei_siltig',2.9],
+        ['klei_siltig',2.5],
+        ['klei_siltig',2.2],
+        ['klei_zandig',1.8],
+        ['zand',1.4],
+        ['zand',1.1],
+        ['zand',0.8],
+        ['zand',0.6],
+        ['zand',0.0]
+    ]
 
 class CPT(BaseModel):
     x: float = 0.0
@@ -413,6 +430,27 @@ class CPT(BaseModel):
                     result.append(self.soillayers[i])
         self.soillayers = result
 
+    def _convert_nen_5014(self, minimum_layer_height: float) -> List[SoilLayer]:
+        """
+        Conversion function for the rule as found in CUR162 electric cone
+
+        Args:
+            None
+
+        Returns:
+            List[SoilLayer]: the list of soillayers
+        """
+        self.soillayers = []             
+        cptdata = self.filter(minimum_layer_height)
+        for row in cptdata:
+            Rf = row[4]
+            for soilcode, _Rf in NEN5140:
+                if Rf >= _Rf:
+                    self.soillayers.append(SoilLayer(z_top=round(row[0],2), z_bottom=round(row[1],2), soilcode=soilcode))
+                    break
+
+        self._merge_layers()
+    
     def _convert_three_type_rule(self, minimum_layer_height: float) -> List[SoilLayer]:
         """
         Conversion function for the three type rule
@@ -468,6 +506,8 @@ class CPT(BaseModel):
         """
         if conversion_type == ConversionType.THREE_TYPE_RULE:
             self._convert_three_type_rule(minimum_layer_height=minimum_layer_height)
+        elif conversion_type == ConversionType.NEN_5104:
+            self._convert_nen_5014(minimum_layer_height=minimum_layer_height)
         else:
             raise NotImplementedError("The given conversion method has not been implemented yet.")
 

@@ -66,13 +66,15 @@ if __name__ == "__main__":
             # now we're here let's also plot the boreholedata and cpt's to see the difference in borehole vs cpt interpretation
             fig = plt.figure(figsize=(6, 10))
             ax = fig.add_subplot()
+
+
             data = cpt.as_dataframe()
             data.plot(x='qc',y='z', ax=ax, label='qc [MPa]')
             data['Rf'] = 50. - data['Rf']
             data.plot(x='Rf',y='z', ax=ax, label='Rf [%]')
             cpt.convert()
             
-            ax.text(1, cpt.soillayers[0].z_top + 1.0, Path(cpt.filename).stem)
+            ax.text(1, cpt.z_top + 1.0, Path(cpt.filename).stem)
             for soillayer in cpt.soillayers:
                 facecolor = HDSR_SOIL_COLORS[soillayer.soilcode]
                 ax.add_patch(
@@ -97,6 +99,9 @@ if __name__ == "__main__":
                         facecolor=facecolor,
                     )
                 )
+
+            ax.plot([0,25],[cpt.z_top, cpt.z_top], 'k--')
+            ax.text(10,cpt.z_top + 0.1, f"{cpt.z_top:.02f}")
             
             ax.grid(which="both")  
             zmax = max([sl.z_top for sl in cpt.soillayers] + [sl.z_top for sl in borehole.soillayers])          
