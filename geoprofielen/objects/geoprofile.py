@@ -61,6 +61,26 @@ class Geoprofile(BaseModel):
                     newsoilprofiles.append(sp)
         self.soilprofiles = newsoilprofiles
     
+    def to_dam_input(self, filepath: str) -> None:
+        p = Path(filepath) / self.id
+        p.mkdir(parents=True, exist_ok=True)
+        fsegments = open(p / "segments.csv", 'w')
+        fsoilprofiles = open(p / "soilprofiles.csv", 'w')
+        
+        fsegments.write("segment_id,soilprofile_id,probability,calculation_type\n")
+        fsoilprofiles.write("soilprofile_id,top_level,soil_name\n")
+
+        for i, soilprofile in enumerate(self.soilprofiles):
+            id = f"profiel_{i+1}"
+            fsegments.write(f"{i+1},{id},100,Stability\n")
+            fsegments.write(f"{i+1},{id},100,Piping\n")
+            for soillayer in soilprofile.soillayers:
+                fsoilprofiles.write(f"{id},{soillayer.z_top:.02f},{soillayer.soilcode}\n")        
+        
+        
+        fsegments.close()
+        fsoilprofiles.close()
+    
     def plot(self, filename: str) -> None:
         fig = plt.figure(figsize=(20, 10))
         ax = fig.add_subplot()

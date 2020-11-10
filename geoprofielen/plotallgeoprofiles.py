@@ -20,7 +20,9 @@ if __name__ == "__main__":
         geoprofilecreator.dijktraject = dijktraject
         try:
             geoprofile = geoprofilecreator.execute()
-            geoprofile.plot(f"../data/geoprofiel/{dtcode}.png")
+            if len(geoprofile.soilprofiles) == 0: continue
+            geoprofile.plot(os.path.join(ROOT_DIR, f"data/geoprofiel/{dtcode}.png"))
+            geoprofile.to_dam_input(os.path.join(ROOT_DIR, "data/dam/"))            
         except Exception as e:
             print(f"Got error trying to generate geoprofile for dijktraject {dtcode}; {e}")
     
