@@ -8,7 +8,7 @@ from pathlib import Path
 
 from settings import ROOT_DIR, HDSR_SOIL_COLORS
 from helpers import case_insensitive_glob
-from geoprofielen.objects.cpt import CPT
+from geoprofielen.objects.cpt import CPT, ConversionType
 from geoprofielen.objects.borehole import Borehole
 
 MAX_DIST = 20
@@ -72,7 +72,7 @@ if __name__ == "__main__":
             data.plot(x='qc',y='z', ax=ax, label='qc [MPa]')
             data['Rf'] = 50. - data['Rf']
             data.plot(x='Rf',y='z', ax=ax, label='Rf [%]')
-            cpt.convert()
+            cpt.convert(conversion_type=ConversionType.NEN_5104)
             
             ax.text(1, cpt.z_top + 1.0, Path(cpt.filename).stem)
             for soillayer in cpt.soillayers:

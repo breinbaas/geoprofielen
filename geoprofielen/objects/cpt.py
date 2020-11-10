@@ -73,6 +73,12 @@ class CPT(BaseModel):
     soillayers: List[SoilLayer] = []
     filename: str = ""
 
+    @classmethod
+    def from_file(self, filename: str) -> 'CPT':
+        cpt = CPT()
+        cpt.read(filename)
+        return cpt
+
     @property
     def date(self) -> str:
         """Return the date of the CPT in the following order (if available) startdate, filedata, empty string (no date)

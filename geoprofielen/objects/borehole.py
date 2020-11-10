@@ -35,6 +35,12 @@ class Borehole(BaseModel):
 
     filename: str = ""
 
+    @classmethod
+    def from_file(self, filename: str) -> 'Borehole':
+        borehole = Borehole()
+        borehole.read(filename)
+        return borehole
+
     @property
     def date(self) -> str:
         """Return the date of the borehole in the following order (if available) startdate, filedata, empty string (no date)
