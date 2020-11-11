@@ -3,6 +3,10 @@
 import os
 from tqdm import tqdm
 
+import sys
+sys.path.append('C:/Users/cvdp/Aveco De Bondt/204774-Automatisering bodemsegmenten HDSR - Documenten/General/geoprofielen')
+sys.path.append('C:/Users/cvdp/Aveco De Bondt/204774-Automatisering bodemsegmenten HDSR - Documenten/General')
+
 from geoprofielen.objects.geoprofilecreator import GeoProfileCreator
 from geoprofielen.objects.dbconnector import DBConnector
 from geoprofielen.settings import ROOT_DIR

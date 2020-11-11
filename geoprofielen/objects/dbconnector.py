@@ -15,7 +15,7 @@ from typing import List
 
 from .pointrd import PointRD
 from .dijktraject import DijkTraject
-from ..secrets import DB_SERVER, DB_PASSWORD, DB_USER, DB_NAME
+from geoprofielen_private.secrets import DB_SERVER, DB_PASSWORD, DB_USER, DB_NAME
 
 class DBConnector():
     def __init__(self):        

@@ -1,4 +1,5 @@
-ROOT_DIR = "C:/Users/brein/Programming/Python/HDSR/geoprofielen/" # verwijzing naar data locatie
+#ROOT_DIR = "C:/Users/brein/Programming/Python/HDSR/geoprofielen/" # verwijzing naar data locatie
+ROOT_DIR = r"C:\Users\cvdp\Aveco De Bondt\204774-Automatisering bodemsegmenten HDSR - Documenten\General"
 
 DEFAULT_MINIMUM_LAYERHEIGHT = 0.2 # minimale laaghoogte bij grondsoort conversies (bvt cpt -> grondsoorten)
 DEFAULT_CHAINAGE_STEP = 10 # stapgrootte tussen punten op de referentielijn om te zoeken naar grondonderzoek

@@ -1,12 +1,18 @@
 # achterhalen van alle gebruikte grondsoortnamen in de boringen
 
 import os
+
+import sys
+sys.path.append('C:/Users/cvdp/Aveco De Bondt/204774-Automatisering bodemsegmenten HDSR - Documenten/General/geoprofielen')
+
 from geoprofielen.helpers import case_insensitive_glob
 from geoprofielen.settings import ROOT_DIR
 from geoprofielen.objects.borehole import Borehole
 from tqdm import tqdm
 
-f = open(os.path.join(ROOT_DIR,"tests/testdata/out/unknown_borehole_codes.csv"), 'w')
+#f = open(os.path.join(ROOT_DIR,"tests/testdata/out/unknown_borehole_codes.csv"), 'w')
+f = open(os.path.join(ROOT_DIR,"tests/unknown_borehole_codes.csv"), 'w')
+
 
 if __name__ == "__main__":
     sfiles = case_insensitive_glob(os.path.join(ROOT_DIR, "data/boringen"), ".gef")
