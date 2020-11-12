@@ -2,10 +2,15 @@
 from tqdm import tqdm
 from geoprofielen.objects.borehole import Borehole
 from geoprofielen.objects.cpt import CPT
+import os, shutil
+from pathlib import Path
 
 NEW_GEF_DIR = "c:/Users/brein/Programming/Python/HDSR/geoprofielen/data/_nieuwedata/GEF-bestanden projecten HDSR/"
 EXISTING_GEF_BOREHOLE_DIR = "c:/Users/brein/Programming/Python/HDSR/geoprofielen/data/boringen/"
 EXISTING_GEF_CPT_DIR = "c:/Users/brein/Programming/Python/HDSR/geoprofielen/data/sonderingen/"
+
+EXPORT_DIR_CPT = "C:/Users/brein/Programming/Python/HDSR/geoprofielen/data/_nieuwedata/cpt"
+EXPORT_DIR_BOREHOLE = "C:/Users/brein/Programming/Python/HDSR/geoprofielen/data/_nieuwedata/borehole"
 
 from helpers import case_insensitive_glob
 
@@ -53,6 +58,8 @@ for f in tqdm(case_insensitive_glob(NEW_GEF_DIR, ".gef")):
                 cptinfo = (cpt.x, cpt.y, cpt.z_top)
                 if cptinfo in cptcoords:
                     print(f"Found double entry {cpt.filename}")
+                else:
+                    shutil.move(f, f"{EXPORT_DIR_CPT}/{Path(cpt.filename).name}")
             except Exception as e:
                 print(f"Could not read {f} with error {e}")
         else:
@@ -61,6 +68,8 @@ for f in tqdm(case_insensitive_glob(NEW_GEF_DIR, ".gef")):
                 boreholeinfo = (borehole.x, borehole.y, borehole.z_top)
                 if boreholeinfo in boreholecoords:
                     print(f"Found double entry {borehole.filename}")
+                else:
+                    shutil.move(f, f"{EXPORT_DIR_BOREHOLE}/{Path(borehole.filename).name}")
             except Exception as e:
                 print(f"Could not read {f} with error {e}")
 
