@@ -255,7 +255,7 @@ class CPT(BaseModel):
     def _parse_data_line(self, line: str, metadata: dict) -> None:
         try:
             if len(line.strip())==0: return
-            args = line.strip().split(metadata["column_seperator"])
+            args = line.replace(metadata["record_seperator"], '').strip().split(metadata["column_seperator"])
             args = [float(arg.strip()) for arg in args if len(arg.strip()) > 0 and arg.strip() != metadata["record_seperator"]]
             
             # skip lines that have a columnvoid
