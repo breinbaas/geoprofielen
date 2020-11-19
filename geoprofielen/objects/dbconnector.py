@@ -69,8 +69,8 @@ class DBConnector():
             for p in pts:
                 if not p.chainage in chainages:
                     final_pts.append(p)
-                    chainages.append(p.chainage)
-
+                    chainages.append(p.chainage)   
+                                        
             result[row[1]] = DijkTraject(
                     id = row[1],
                     naam = row[2],

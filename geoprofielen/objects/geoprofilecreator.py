@@ -92,14 +92,21 @@ class GeoProfileCreator(BaseModel):
         
         # create a spacing
         chs = np.arange(self.dijktraject.chainage_min + DEFAULT_CHAINAGE_STEP / 2, self.dijktraject.chainage_max, DEFAULT_CHAINAGE_STEP)
+        # add startpoint 
+        chs = np.insert(chs, 0, 0.)
+
+        # and endpoint unless the last point is already with 0.5m from the end point
+        if self.dijktraject.chainage_max > chs[-1] + 0.5:
+            chs = np.insert(chs, len(chs), self.dijktraject.chainage_max)        
         
         # find all soillayers based on CPTs
         for ch in chs:
             left = ch - DEFAULT_CHAINAGE_STEP / 2
+            if left < 0:
+                left = 0
             right = ch + DEFAULT_CHAINAGE_STEP / 2
-
-            if ch==chs[-1]:
-                right = chs[-1]
+            if right > max(chs):
+                right = max(chs)  
 
             point = self.dijktraject.chainage_to_xy(ch)
             point.chainage = ch
@@ -142,8 +149,6 @@ class GeoProfileCreator(BaseModel):
                 result.soilprofiles.append(soilprofile)
 
 
-        # find all soillayers based on boreholes
-
-
         result.merge()
+
         return result

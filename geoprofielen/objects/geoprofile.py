@@ -10,6 +10,7 @@ __status__ = "Development"
 from pydantic import BaseModel
 from typing import List
 from pathlib import Path
+import numpy as np
 
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -60,8 +61,30 @@ class Geoprofile(BaseModel):
                 else:
                     newsoilprofiles.append(sp)
         self.soilprofiles = newsoilprofiles
+
+    def get_xy_from_l_on_refline(self, l):
+        for i in range(1,len(self.points)):
+            p1 = self.points[i-1]
+            p2 = self.points[i]
+
+            if p1.chainage <= l and l <= p2.chainage:
+                x = p1.x + (l - p1.chainage) / (p2.chainage - p1.chainage) * (p1.x - p2.x)
+                y = p1.y + (l - p1.chainage) / (p2.chainage - p1.chainage) * (p1.y - p2.y)
+                return x, y
+
+        raise ValueError(f"Could not find xy for chainage {l}; min chainage = {self.points[0].chainage}, max chainage = {self.points[-1].chainage}")
     
-    def to_dam_input(self, filepath: str) -> None:
+    
+    def get_partial_refline(self, chainage_start: int, chainage_end: int):
+        result = []
+        points = np.linspace(chainage_start, chainage_end, int((chainage_end - chainage_start) / 10.) + 1)
+        for p in points:
+            result.append(self.get_xy_from_l_on_refline(p))
+
+        return result
+
+    
+    def to_dam_input(self, filepath: str, segmentid: int, shapeinput) -> int:
         p = Path(filepath) / self.id
         p.mkdir(parents=True, exist_ok=True)
         fsegments = open(p / "segments.csv", 'w')
@@ -70,16 +93,19 @@ class Geoprofile(BaseModel):
         fsegments.write("segment_id,soilprofile_id,probability,calculation_type\n")
         fsoilprofiles.write("soilprofile_id,top_level,soil_name\n")
 
-        for i, soilprofile in enumerate(self.soilprofiles):
-            id = f"profiel_{i+1}"
-            fsegments.write(f"{i+1},{id},100,Stability\n")
-            fsegments.write(f"{i+1},{id},100,Piping\n")
+        for i, soilprofile in enumerate(self.soilprofiles):            
+            id = f"profiel_{segmentid+i+1}"
+            fsegments.write(f"{segmentid+i+1},{id},100,Stability\n")
+            fsegments.write(f"{segmentid+i+1},{id},100,Piping\n")
             for soillayer in soilprofile.soillayers:
-                fsoilprofiles.write(f"{id},{soillayer.z_top:.02f},{soillayer.soilcode}\n")        
-        
+                fsoilprofiles.write(f"{id},{soillayer.z_top:.02f},{soillayer.soilcode}\n")  
+           
+            # store points and segmentid
+            shapeinput.append((f"{segmentid+i+1}", self.get_partial_refline(soilprofile.x_left, soilprofile.x_right)) )
         
         fsegments.close()
         fsoilprofiles.close()
+        return segmentid + len(self.soilprofiles), shapeinput
     
     def plot(self, filename: str) -> None:
         fig = plt.figure(figsize=(20, 10))
