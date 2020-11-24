@@ -9,7 +9,6 @@ __status__ = "Development"
 
 from pydantic import BaseModel
 from typing import List
-from pathlib import Path
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -84,28 +83,30 @@ class Geoprofile(BaseModel):
         return result
 
     
-    def to_dam_input(self, filepath: str, segmentid: int, shapeinput) -> int:
-        p = Path(filepath) / self.id
-        p.mkdir(parents=True, exist_ok=True)
-        fsegments = open(p / "segments.csv", 'w')
-        fsoilprofiles = open(p / "soilprofiles.csv", 'w')
+    def to_dam_input(self, segmentid: int, shapeinput) -> int:
+        #p = Path(filepath) / self.id
+        #p.mkdir(parents=True, exist_ok=True)
+        #fsegments = open(p / "segments.csv", 'w')
+        #fsoilprofiles = open(p / "soilprofiles.csv", 'w')        
         
-        fsegments.write("segment_id,soilprofile_id,probability,calculation_type\n")
-        fsoilprofiles.write("soilprofile_id,top_level,soil_name\n")
-
+        lines_segments = []
+        lines_soilprofiles = []
         for i, soilprofile in enumerate(self.soilprofiles):            
             id = f"profiel_{segmentid+i+1}"
-            fsegments.write(f"{segmentid+i+1},{id},100,Stability\n")
-            fsegments.write(f"{segmentid+i+1},{id},100,Piping\n")
+            lines_segments.append(f"{segmentid+i+1},{id},100,Stability\n")
+            lines_segments.append(f"{segmentid+i+1},{id},100,Piping\n")
+            #fsegments.write(f"{segmentid+i+1},{id},100,Stability\n")
+            #fsegments.write(f"{segmentid+i+1},{id},100,Piping\n")
             for soillayer in soilprofile.soillayers:
-                fsoilprofiles.write(f"{id},{soillayer.z_top:.02f},{soillayer.soilcode}\n")  
-           
+                #fsoilprofiles.write(f"{id},{soillayer.z_top:.02f},{soillayer.soilcode}\n")  
+                lines_soilprofiles.append(f"{id},{soillayer.z_top:.02f},{soillayer.soilcode}\n")
             # store points and segmentid
             shapeinput.append((f"{segmentid+i+1}", self.get_partial_refline(soilprofile.x_left, soilprofile.x_right)) )
         
-        fsegments.close()
-        fsoilprofiles.close()
-        return segmentid + len(self.soilprofiles), shapeinput
+        #fsegments.close()
+        #fsoilprofiles.close()
+        # yeah I know.. ugly but it is a fast fix to write everything to one file.. sorry ;-)
+        return lines_segments, lines_soilprofiles, segmentid + len(self.soilprofiles), shapeinput
     
     def plot(self, filename: str) -> None:
         fig = plt.figure(figsize=(20, 10))

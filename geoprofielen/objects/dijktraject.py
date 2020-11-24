@@ -9,6 +9,7 @@ __status__ = "Development"
 
 from pydantic import BaseModel
 from typing import List
+from shapely.geometry import Polygon, Point
 
 from .pointrd import PointRD
 
@@ -16,6 +17,10 @@ class DijkTraject(BaseModel):
     id: str = ""
     naam: str = ""
     referentielijn: List[PointRD] = []
+
+    # you can assign a shapely polygon to the dijktraject which 
+    # will limit the area where soilinvestigations can be found.
+    soilinvestigation_polygon: Polygon = None
 
     @property
     def chainage_min(self) -> int:
@@ -30,6 +35,13 @@ class DijkTraject(BaseModel):
             return self.referentielijn[-1].chainage
         else:
             return 0
+
+    def point_in_soilinvestigation_polygon(self, x: float, y: float) -> bool:
+        if self.soilinvestigation_polygon:        
+            p = Point(x, y)
+            return p.within(self.soilinvestigation_polygon)
+        else:
+            return True
 
     def chainage_to_xy(self, chainage: int) -> PointRD:
         if chainage < self.chainage_min or chainage > self.chainage_max:

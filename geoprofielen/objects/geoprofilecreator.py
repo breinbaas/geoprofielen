@@ -17,7 +17,7 @@ from pathlib import Path
 
 
 from .dijktraject import DijkTraject
-from .cpt import CPT
+from .cpt import CPT, ConversionType
 from .borehole import Borehole
 from .geoprofile import Geoprofile
 from .soilprofile import Soilprofile
@@ -46,7 +46,7 @@ class GeoProfileCreator(BaseModel):
             cpt = CPT()
             try:
                 cpt.read(f)
-                cpt.convert()
+                cpt.convert(conversion_type=ConversionType.NEN_5104)
                 self._cpts.append(cpt)
             except Exception as e:
                 self._log.append(f"[E] error in cpt file {f}; {e}")
@@ -111,14 +111,14 @@ class GeoProfileCreator(BaseModel):
             point = self.dijktraject.chainage_to_xy(ch)
             point.chainage = ch
             result.points.append(point)
-            
-            # find closest CPT but always within MAX_CPT_DISTANCE
+
+           # find closest CPT but always within MAX_CPT_DISTANCE
             usecpt, dlmin = None, 1e9
             for cpt in self._cpts:                
                 dx = cpt.x - point.x
                 dy = cpt.y - point.y
                 dl = math.sqrt(dx**2 + dy**2)
-                if dl < MAX_CPT_DISTANCE and dl < dlmin:
+                if dl < MAX_CPT_DISTANCE and dl < dlmin and self.dijktraject.point_in_soilinvestigation_polygon(cpt.x, cpt.y):
                     dlmin = dl
                     usecpt = cpt
 
