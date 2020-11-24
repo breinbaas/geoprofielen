@@ -14,6 +14,9 @@ from shapely.geometry import Polygon, Point
 from .pointrd import PointRD
 
 class DijkTraject(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
+
     id: str = ""
     naam: str = ""
     referentielijn: List[PointRD] = []

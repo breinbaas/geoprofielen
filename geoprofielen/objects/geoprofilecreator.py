@@ -128,7 +128,7 @@ class GeoProfileCreator(BaseModel):
                 dx = borehole.x - point.x
                 dy = borehole.y - point.y
                 dl = math.sqrt(dx**2 + dy**2)
-                if dl < MAX_BOREHOLE_DISTANCE and dl < dlmin:
+                if dl < MAX_BOREHOLE_DISTANCE and dl < dlmin and self.dijktraject.point_in_soilinvestigation_polygon(borehole.x, borehole.y):
                     dlmin = dl
                     useborehole = borehole
             
