@@ -37,7 +37,7 @@ class DBConnector():
         except (Exception, psycopg2.Error) as error:
             print(f"Got database error; {error}") 
 
-    def get_dijktrajecten(self) -> List[DijkTraject]:
+    def get_dijktrajecten(self) -> dict:
         result = {}
         rows = self._select("select geom, subsect_id, naam from rwk_areaal_2024")
 

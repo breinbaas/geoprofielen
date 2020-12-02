@@ -118,7 +118,12 @@ class GeoProfileCreator(BaseModel):
                 dx = cpt.x - point.x
                 dy = cpt.y - point.y
                 dl = math.sqrt(dx**2 + dy**2)
-                if dl < MAX_CPT_DISTANCE and dl < dlmin and self.dijktraject.point_in_soilinvestigation_polygon(cpt.x, cpt.y):
+                    
+                in_polygon = True 
+                if self.dijktraject.has_soilinvestigation_polygon(): # any polygon to check?
+                    in_polygon = self.dijktraject.point_in_soilinvestigation_polygon(cpt.x, cpt.y)
+                
+                if dl < MAX_CPT_DISTANCE and dl < dlmin and in_polygon:
                     dlmin = dl
                     usecpt = cpt
 
@@ -128,10 +133,14 @@ class GeoProfileCreator(BaseModel):
                 dx = borehole.x - point.x
                 dy = borehole.y - point.y
                 dl = math.sqrt(dx**2 + dy**2)
-                if dl < MAX_BOREHOLE_DISTANCE and dl < dlmin and self.dijktraject.point_in_soilinvestigation_polygon(borehole.x, borehole.y):
+                    
+                in_polygon = True 
+                if self.dijktraject.has_soilinvestigation_polygon(): # any polygon to check?
+                    in_polygon = self.dijktraject.point_in_soilinvestigation_polygon(borehole.x, borehole.y)
+                
+                if dl < MAX_BOREHOLE_DISTANCE and dl < dlmin and in_polygon:
                     dlmin = dl
-                    useborehole = borehole
-            
+                    useborehole = borehole            
             
             if usecpt:
                 soilprofile = Soilprofile(
@@ -146,6 +155,14 @@ class GeoProfileCreator(BaseModel):
                     soilprofile.add(useborehole.soillayers)
                     soilprofile.source += f" + {str(Path(useborehole.filename).stem)}"
 
+                result.soilprofiles.append(soilprofile)
+            elif useborehole:
+                soilprofile = Soilprofile(
+                    x_left = left,
+                    x_right = right,
+                    source = str(Path(useborehole.filename).stem),
+                    soillayers = useborehole.soillayers
+                )  
                 result.soilprofiles.append(soilprofile)
 
 

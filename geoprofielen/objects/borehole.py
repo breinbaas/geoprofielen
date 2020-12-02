@@ -148,12 +148,13 @@ class Borehole(BaseModel):
             try:
                 self.x = round(float(args[1].strip()), 2)
                 self.y = round(float(args[2].strip()), 2)
-            except:
+            except Exception as e:
                 raise ValueError(f"Error reading xyid '{line}' -> error {e}")
         elif keyword == "ZID":
             try:
+                assert len(args) == 3 # avoids a situation where #ZID= 0, -1,24, 0.01 leads to a z of -1 due to the erronous comma in 1,24 (should be 1.24)
                 self.z_top = float(args[1].strip())
-            except:
+            except Exception as e:
                 raise ValueError(f"Error reading zid '{line}' -> error {e}")     
         elif keyword == "TESTID":
             self.name = args[0].strip()    

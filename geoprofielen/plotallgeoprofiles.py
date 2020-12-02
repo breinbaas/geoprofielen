@@ -9,6 +9,12 @@ from geoprofielen.objects.geoprofilecreator import GeoProfileCreator
 from geoprofielen.objects.dbconnector import DBConnector
 from geoprofielen.settings import ROOT_DIR
 
+# define a soilinvestigation polygon file here if there is one..
+# this will define the areas to search for soil investigations
+# the script expects a [(x1,y1),(x2,y2)...(xn,yn)] polygon
+# and a field called 'naam' with the name of the dijktraject  
+SOILINVESTIGATION_POLYGON_FILE = "C:/Users/brein/Programming/Python/HDSR/geoprofielen/data/gis/soilinvestigation_area_polygons.shp"
+
 if __name__ == "__main__":
     dbc = DBConnector()
     dijktrajecten = dbc.get_dijktrajecten()
@@ -30,7 +36,19 @@ if __name__ == "__main__":
     fsegments.write("segment_id,soilprofile_id,probability,calculation_type\n")
     fsoilprofiles.write("soilprofile_id,top_level,soil_name\n")
 
+    # also read the polygons for the search for soilinvestigations
+    sfrecords = []
+    if os.path.isfile(SOILINVESTIGATION_POLYGON_FILE):
+        sf = shapefile.Reader(SOILINVESTIGATION_POLYGON_FILE)
+        sfrecords = sf.shapeRecords()
+
     for dtcode, dijktraject in tqdm(dijktrajecten.items()):
+        # check if a polygon can be assigned
+        for i in range(len(sfrecords)):
+            if dijktraject.naam == sfrecords[i].record['naam']:
+                dijktraject.soilinvestigation_polygon = sfrecords[i].shape.points
+                break
+        
         geoprofilecreator.dijktraject = dijktraject
         try:
             geoprofile = geoprofilecreator.execute()
