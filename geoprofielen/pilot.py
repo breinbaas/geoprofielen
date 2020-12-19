@@ -10,18 +10,18 @@ from geoprofielen.objects.dbconnector import DBConnector
 from geoprofielen.settings import ROOT_DIR
 
 PILOT_AREA = [
-    "118A1",
-    "118B1",
+    #"118A1",
+    #"118B1",
     "118B2",
-    "118B3",
-    "151",
-    "150",
-    "118B4",
-    "141",
-    "140",
-    "117A",
-    "117B",
-    "117C1"    
+    #"118B3",
+    #"151",
+    #"150",
+    #"118B4",
+    #"141",
+    #"140",
+    #"117A",
+    #"117B",
+    #"117C1"    
 ]
 
 SOILINVESTIGATION_POLYGON_FILE = "C:/Users/brein/Programming/Python/HDSR/geoprofielen/data/gis/soilinvestigation_area_polygons.shp"

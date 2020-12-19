@@ -8,6 +8,7 @@ from tqdm import tqdm
 if __name__ == "__main__":
     f = open("./data/sonderingen/cptcoords.csv", 'w')
     sfiles = case_insensitive_glob("./data/sonderingen", ".gef")
+
     for sfile in tqdm(sfiles):
         cpt = CPT()        
         try:

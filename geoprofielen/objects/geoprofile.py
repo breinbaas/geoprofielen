@@ -55,7 +55,7 @@ class Geoprofile(BaseModel):
             if len(newsoilprofiles) == 0:
                 newsoilprofiles.append(sp)
             else:
-                if sp.soillayers == newsoilprofiles[-1].soillayers and sp.x_left == newsoilprofiles[-1].x_right:
+                if sp.source == newsoilprofiles[-1].source and sp.x_left == newsoilprofiles[-1].x_right:
                     newsoilprofiles[-1].x_right = sp.x_right
                 else:
                     newsoilprofiles.append(sp)

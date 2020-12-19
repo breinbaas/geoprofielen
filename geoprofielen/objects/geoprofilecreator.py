@@ -91,29 +91,27 @@ class GeoProfileCreator(BaseModel):
         self._log.append("[i] Matching reference line with available cpts / borehole...")
         
         # create a spacing
-        chs = np.arange(self.dijktraject.chainage_min + DEFAULT_CHAINAGE_STEP / 2, self.dijktraject.chainage_max, DEFAULT_CHAINAGE_STEP)
-        # add startpoint 
-        chs = np.insert(chs, 0, 0.)
+        chs = np.arange(self.dijktraject.chainage_min, self.dijktraject.chainage_max, DEFAULT_CHAINAGE_STEP)        
 
         # and endpoint unless the last point is already with 0.5m from the end point
         if self.dijktraject.chainage_max > chs[-1] + 0.5:
             chs = np.insert(chs, len(chs), self.dijktraject.chainage_max)        
         
         # find all soillayers based on CPTs
-        for ch in chs:
-            left = ch - DEFAULT_CHAINAGE_STEP / 2
-            if left < 0:
-                left = 0
-            right = ch + DEFAULT_CHAINAGE_STEP / 2
+        for i in range(0, len(chs)-1):
+            left = chs[i]
+            right = chs[i+1]
             if right > max(chs):
                 right = max(chs)  
 
-            point = self.dijktraject.chainage_to_xy(ch)
+            ch = int((left + right) /  2)
+
+            point = self.dijktraject.chainage_to_xy(int((left + right) / 2.))
             point.chainage = ch
-            result.points.append(point)
+            result.points = self.dijktraject.referentielijn
 
            # find closest CPT but always within MAX_CPT_DISTANCE
-            usecpt, dlmin = None, 1e9
+            usecpt, useborehole, dlmin_cpt, dlmin_borehole = None, None, 1e9, 1e9
             for cpt in self._cpts:                
                 dx = cpt.x - point.x
                 dy = cpt.y - point.y
@@ -123,12 +121,11 @@ class GeoProfileCreator(BaseModel):
                 if self.dijktraject.has_soilinvestigation_polygon(): # any polygon to check?
                     in_polygon = self.dijktraject.point_in_soilinvestigation_polygon(cpt.x, cpt.y)
                 
-                if dl < MAX_CPT_DISTANCE and dl < dlmin and in_polygon:
-                    dlmin = dl
+                if dl < MAX_CPT_DISTANCE and dl < dlmin_cpt and in_polygon:
+                    dlmin_cpt = dl
                     usecpt = cpt
 
             # find closest borehole but always within MAX_BOREHOLE_DISTANCE
-            useborehole, dlmin = None, 1e9
             for borehole in self._boreholes:                
                 dx = borehole.x - point.x
                 dy = borehole.y - point.y
@@ -138,9 +135,9 @@ class GeoProfileCreator(BaseModel):
                 if self.dijktraject.has_soilinvestigation_polygon(): # any polygon to check?
                     in_polygon = self.dijktraject.point_in_soilinvestigation_polygon(borehole.x, borehole.y)
                 
-                if dl < MAX_BOREHOLE_DISTANCE and dl < dlmin and in_polygon:
-                    dlmin = dl
-                    useborehole = borehole            
+                if dl < MAX_BOREHOLE_DISTANCE and dl < dlmin_borehole and in_polygon:
+                    dlmin_borehole = dl
+                    useborehole = borehole
             
             if usecpt:
                 soilprofile = Soilprofile(
@@ -148,7 +145,7 @@ class GeoProfileCreator(BaseModel):
                     x_right = right,
                     source = str(Path(usecpt.filename).stem),
                     soillayers = usecpt.soillayers
-                )           
+                )                  
 
                 # kunnen we dit combinberen met een borehole?
                 if useborehole:
@@ -156,14 +153,14 @@ class GeoProfileCreator(BaseModel):
                     soilprofile.source += f" + {str(Path(useborehole.filename).stem)}"
 
                 result.soilprofiles.append(soilprofile)
+            
             elif useborehole:
-                soilprofile = Soilprofile(
+                result.soilprofiles.append(Soilprofile(
                     x_left = left,
                     x_right = right,
                     source = str(Path(useborehole.filename).stem),
                     soillayers = useborehole.soillayers
-                )  
-                result.soilprofiles.append(soilprofile)
+                ))
 
 
         result.merge()

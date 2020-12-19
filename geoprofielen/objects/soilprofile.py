@@ -40,26 +40,34 @@ class Soilprofile(BaseModel):
         return (self.x_left + self.x_right) / 2.
 
     def _merge(self) -> None:
-        for i, sl in enumerate(self.soillayers):
-            if sl.height < DEFAULT_MINIMUM_LAYERHEIGHT:
-                if i==0 and len(self.soillayers) > 1:
-                    self.soillayers[1].z_top = sl.z_top 
-                    self.soillayers.pop() # bye bye
-                elif i==len(self.soillayers)-1 and len(self.soillayers)>1:
-                    self.soillayers[-2].z_bottom = sl.z_bottom
-                    self.soillayers.pop(-1)
-                else:
-                    z_mid = round((sl.z_top + sl.z_bottom) / 2.,2)
-                    self.soillayers[i-1].z_bottom = z_mid
-                    self.soillayers[i+1].z_top = z_mid
-                    self.soillayers.pop(i)
+        to_remove = [i for i in range(len(self.soillayers)) if self.soillayers[i].height < DEFAULT_MINIMUM_LAYERHEIGHT]
+        
+        if len(to_remove) == 0:
+            return
+
+        idx = to_remove[0]
+        if idx == 0 and len(self.soillayers)>1:
+            self.soillayers[1].z_top = self.soillayers[0].z_top
+            self.soillayers.pop(0)
+        elif idx == len(self.soillayers) - 1:
+            self.soillayers[len(self.soillayers-2)].z_bottom = self.soillayers[len(self.soillayers)-1].z_bottom
+            self.soillayers.pop(len(self.soillayers)-1)
+        else:
+            z_mid = round((self.soillayers[idx].z_top + self.soillayers[idx].z_bottom) / 2.0, 2)
+            self.soillayers[idx-1].z_bottom = z_mid
+            self.soillayers[idx+1].z_top = z_mid
+            self.soillayers.pop(idx)
+
+        self._merge()
 
 
     def add(self, soillayers: List[SoilLayer]) -> None:
         # only add if the new soilprofile intersects with the current one
         # or else we would have to make up soillayers
-        z_top = max([sl.z_top for sl in soillayers])
-        z_bottom = min([sl.z_bottom for sl in soillayers])
+        result = [sl for sl in soillayers] # or copy.deepcopy()
+
+        z_top = max([sl.z_top for sl in result])
+        z_bottom = min([sl.z_bottom for sl in result])
 
         if z_top < self.z_bottom or z_bottom > self.z_top:
             return
@@ -73,11 +81,11 @@ class Soilprofile(BaseModel):
             bottomlayers[0].z_top = z_bottom
 
         for layer in toplayers[::-1]:
-            soillayers.insert(0, layer)
+            result.insert(0, layer)
         for layer in bottomlayers:
-            soillayers.append(layer)
+            result.append(layer)
 
-        self.soillayers = soillayers
+        self.soillayers = [sl for sl in result]
         self._merge()
 
 

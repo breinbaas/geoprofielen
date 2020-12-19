@@ -119,6 +119,9 @@ class Borehole(BaseModel):
         """
         lines = open(filename, "r", encoding="utf-8", errors="ignore").readlines()
 
+        # remove empty lines
+        lines = [line.strip() for line in lines if len(line.strip())>0]
+
         self.read_from_gef_stringlist(lines)
 
     def _parse_header_line(self, line: str, metadata: dict) -> None:
