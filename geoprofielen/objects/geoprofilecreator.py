@@ -155,12 +155,14 @@ class GeoProfileCreator(BaseModel):
                 result.soilprofiles.append(soilprofile)
             
             elif useborehole:
-                result.soilprofiles.append(Soilprofile(
+                soilprofile = Soilprofile(
                     x_left = left,
                     x_right = right,
                     source = str(Path(useborehole.filename).stem),
                     soillayers = useborehole.soillayers
-                ))
+                )
+                soilprofile._merge() # this prevents from adding boreholelayers < DEFAULT_MINIMUM_LAYERHEIGHT
+                result.soilprofiles.append(soilprofile)
 
 
         result.merge()
