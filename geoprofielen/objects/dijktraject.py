@@ -23,8 +23,8 @@ class DijkTraject(BaseModel):
 
     # you can assign a shapely polygon to the dijktraject which 
     # will limit the area where soilinvestigations can be found.
-    soilinvestigation_polygon: List = []
-
+    soilinvestigation_polygon: List = []    
+    
     @property
     def chainage_min(self) -> int:
         if len(self.referentielijn) > 0:

@@ -50,7 +50,7 @@ class Soilprofile(BaseModel):
             self.soillayers[1].z_top = self.soillayers[0].z_top
             self.soillayers.pop(0)
         elif idx == len(self.soillayers) - 1:
-            self.soillayers[len(self.soillayers-2)].z_bottom = self.soillayers[len(self.soillayers)-1].z_bottom
+            self.soillayers[len(self.soillayers)-2].z_bottom = self.soillayers[len(self.soillayers)-1].z_bottom
             self.soillayers.pop(len(self.soillayers)-1)
         else:
             z_mid = round((self.soillayers[idx].z_top + self.soillayers[idx].z_bottom) / 2.0, 2)

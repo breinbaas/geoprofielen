@@ -12,8 +12,9 @@ from typing import List
 import os
 import numpy as np
 import math
-
 from pathlib import Path
+
+import folium
 
 
 from .dijktraject import DijkTraject
@@ -23,6 +24,7 @@ from .geoprofile import Geoprofile
 from .soilprofile import Soilprofile
 from ..helpers import case_insensitive_glob
 from ..settings import DEFAULT_CHAINAGE_STEP, MAX_CPT_DISTANCE, MAX_BOREHOLE_DISTANCE, HDSR_SOIL_COLORS
+from ..objects.pointrd import PointRD
 
 class GeoProfileCreator(BaseModel):    
     cpt_path: str
@@ -75,7 +77,10 @@ class GeoProfileCreator(BaseModel):
             f.write(f"{l}\n")
         f.close()
 
-    def execute(self) -> Geoprofile:
+    def execute(self, plot_map_path="") -> Geoprofile:
+        cptsforplot = []
+        boreholesforplot = []
+
         result = Geoprofile()
         result.name = self.dijktraject.naam
         result.id = self.dijktraject.id
@@ -140,6 +145,9 @@ class GeoProfileCreator(BaseModel):
                     useborehole = borehole
             
             if usecpt:
+                if not usecpt.name in [c[-1] for c in cptsforplot]:
+                    cptsforplot.append((usecpt.x, usecpt.y, usecpt.filename))
+
                 soilprofile = Soilprofile(
                     x_left = left,
                     x_right = right,
@@ -149,12 +157,16 @@ class GeoProfileCreator(BaseModel):
 
                 # kunnen we dit combinberen met een borehole?
                 if useborehole:
+                    if not useborehole.name in [c[-1] for c in boreholesforplot]:
+                        boreholesforplot.append((useborehole.x, useborehole.y, useborehole.filename))
                     soilprofile.add(useborehole.soillayers)
                     soilprofile.source += f" + {str(Path(useborehole.filename).stem)}"
 
                 result.soilprofiles.append(soilprofile)
             
             elif useborehole:
+                if not useborehole.name in [c[-1] for c in boreholesforplot]:
+                    boreholesforplot.append((useborehole.x, useborehole.y, useborehole.filename))
                 soilprofile = Soilprofile(
                     x_left = left,
                     x_right = right,
@@ -166,5 +178,38 @@ class GeoProfileCreator(BaseModel):
 
 
         result.merge()
+
+        if len(plot_map_path)>0:
+            px = []
+            py = []
+            for p in self.dijktraject.referentielijn:
+                px.append(p.lat)
+                py.append(p.lon)
+
+            pmid = (sum(px) / len(px), sum(py) / len(py))
+
+            fmap = folium.Map(location=[pmid[0],pmid[1]], tiles='openstreetmap', zoom_start=17)
+            folium.PolyLine(zip(px,py), color="red").add_to(fmap)   
+
+            # HIER!
+            # todo add reference image to polyline   
+
+            for b in boreholesforplot:
+                prd = PointRD(x=b[0], y=b[1])
+                prd.to_wgs84()
+                filename = str(b[-1]).replace("\\", "/").replace(".gef", ".png")
+                html = f'<img src="file:///{filename}" height=400px />'
+                folium.Marker((prd.lat, prd.lon), icon=folium.Icon(color='blue', icon='info-sign'), popup=html).add_to(fmap)
+
+
+            for b in cptsforplot:
+                prd = PointRD(x=b[0], y=b[1])
+                prd.to_wgs84()
+                filename = str(b[-1]).replace("\\", "/").replace(".gef", ".png")
+                html = f'<img src="file:///{filename}" height=400px />'
+                folium.Marker((prd.lat, prd.lon), icon=folium.Icon(color='red', icon='info-sign'), popup=html).add_to(fmap)               
+            
+            fmap.save(str(Path(plot_map_path) / self.dijktraject.id) + ".html")
+
 
         return result

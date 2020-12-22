@@ -10,18 +10,18 @@ from geoprofielen.objects.dbconnector import DBConnector
 from geoprofielen.settings import ROOT_DIR
 
 PILOT_AREA = [
-    #"118A1",
-    #"118B1",
+    "118A1",
+    "118B1",
     "118B2",
-    #"118B3",
-    #"151",
-    #"150",
-    #"118B4",
-    #"141",
-    #"140",
-    #"117A",
-    #"117B",
-    #"117C1"    
+    "118B3",
+    "151",
+    "150",
+    "118B4",
+    "141",
+    "140",
+    "117A",
+    "117B",
+    "117C1"    
 ]
 
 SOILINVESTIGATION_POLYGON_FILE = "C:/Users/brein/Programming/Python/HDSR/geoprofielen/data/gis/soilinvestigation_area_polygons.shp"
@@ -64,7 +64,7 @@ if __name__ == "__main__":
         
         geoprofilecreator.dijktraject = dijktraject
         try:
-            geoprofile = geoprofilecreator.execute()
+            geoprofile = geoprofilecreator.execute(plot_map_path=os.path.join(ROOT_DIR, "data/geoprofiel/pilot"))
             if len(geoprofile.soilprofiles) == 0: continue
             
             geoprofile.plot(os.path.join(ROOT_DIR, f"data/geoprofiel/pilot/{dtcode}.png"))
@@ -76,7 +76,7 @@ if __name__ == "__main__":
                 fsegments.write(line)   
             for line in lines_soilprofiles:
                 fsoilprofiles.write(line)
-
+            
         except Exception as e:
             print(f"Got error trying to generate geoprofile for dijktraject {dtcode}; {e}")
 

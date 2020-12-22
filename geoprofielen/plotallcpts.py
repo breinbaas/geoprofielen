@@ -14,9 +14,9 @@ if __name__ == "__main__":
         try:
             cpt.read(str(sfile))
             cpt.convert()
-            cpt.plot(filepath="./data/sonderingen", filename=f"{sfile.stem}_threetype.png")
-            cpt.convert(conversion_type=ConversionType.NEN_5104)
-            cpt.plot(filepath="./data/sonderingen", filename=f"{sfile.stem}_nen.png")
+            cpt.plot(filepath="./data/sonderingen", filename=f"{sfile.stem}.png")
+            #cpt.convert(conversion_type=ConversionType.NEN_5104)
+            #cpt.plot(filepath="./data/sonderingen", filename=f"{sfile.stem}_nen.png")
             f.write(f"{cpt.x},{cpt.y},{Path(cpt.filename).stem}\n")
 
         except Exception as e:
