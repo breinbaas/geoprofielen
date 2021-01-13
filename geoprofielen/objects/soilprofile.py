@@ -17,7 +17,7 @@ class Soilprofile(BaseModel):
     x_left: int = 0
     x_right: int = 0
     source: str = ""
-    soillayers: List[SoilLayer] = []
+    soillayers: List[SoilLayer] = []        
 
     @property
     def z_top(self) -> float:

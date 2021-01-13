@@ -21,9 +21,11 @@ from .dijktraject import DijkTraject
 from .cpt import CPT, ConversionType
 from .borehole import Borehole
 from .geoprofile import Geoprofile
+from .pgeoprofile import PGeoprofile
 from .soilprofile import Soilprofile
+from .psoilprofile import PSoilprofile
 from ..helpers import case_insensitive_glob
-from ..settings import DEFAULT_CHAINAGE_STEP, MAX_CPT_DISTANCE, MAX_BOREHOLE_DISTANCE, HDSR_SOIL_COLORS
+from ..settings import DEFAULT_CHAINAGE_STEP, MAX_CPT_DISTANCE, MAX_BOREHOLE_DISTANCE, NUM_PROB_SOILINVESTIGATIONS, HDSR_SOIL_COLORS, MIN_PROBABILISTIC_SOILPROFILE_LENGTH, MIN_PROBABILISTIC_CPT_BOREHOLE_LENGTH
 from ..objects.pointrd import PointRD
 
 class GeoProfileCreator(BaseModel):    
@@ -34,7 +36,12 @@ class GeoProfileCreator(BaseModel):
     _cpts: List[CPT] = []
     _boreholes: List[Borehole] = []
     _log: List[str] = []
+    _plog: List[str] = [] # logfile for probabilistic approach
     is_dirty: bool = True
+
+    @property
+    def plog(self) -> List[str]:
+        return self._plog
 
     @property
     def log(self) -> List[str]:
@@ -77,6 +84,64 @@ class GeoProfileCreator(BaseModel):
             f.write(f"{l}\n")
         f.close()
 
+    def save_plog(self, filename: str) -> None:
+        f = open(filename, 'w')
+        for l in self._plog:
+            f.write(f"{l}\n")
+        f.close()
+
+    def execute_prob(self) -> PGeoprofile:
+        result = PGeoprofile()
+        result.name = self.dijktraject.naam
+        result.id = self.dijktraject.id
+
+        # TODO > geoprofile als aparte class maken en veel van de code daarheen verplaatsen..
+        self._plog.append("[i] Reading data...")
+
+        if self.is_dirty:
+            self._read_cpts()
+            self._read_boreholes()
+            self.is_dirty = False
+        
+        # split in 100m pieces (except for the last which might get a max lenght of 199.99)
+        chs = np.arange(self.dijktraject.chainage_min, self.dijktraject.chainage_max, MIN_PROBABILISTIC_SOILPROFILE_LENGTH)
+        chs[-1] = self.dijktraject.chainage_max
+
+        for i in range(1, len(chs)):
+            left = chs[i-1]
+            right = chs[i]
+            mid = (left + right) / 2.0
+            point = self.dijktraject.chainage_to_xy(mid)
+
+            # find all cpts and boreholes and store the distance to the current point
+            # make sure the cpts / boreholes are longer than the required minimal length
+            # this makes sure that we don't use soil investigations that are too short
+            cpts = [[math.sqrt(math.pow((cpt.x - point.x),2) + math.pow((cpt.y - point.y),2)), cpt] for cpt in self._cpts if cpt.length > MIN_PROBABILISTIC_CPT_BOREHOLE_LENGTH]
+            boreholes = [[math.sqrt(math.pow((borehole.x - point.x),2) + math.pow((borehole.y - point.y),2)), borehole] for borehole in self._boreholes if borehole.length > MIN_PROBABILISTIC_CPT_BOREHOLE_LENGTH]
+            
+            # add all
+            total = cpts + boreholes
+
+            # sort on distance and the number we require
+            total = sorted(total, key=lambda x: x[0])[:NUM_PROB_SOILINVESTIGATIONS]
+            sumdl = sum([t[0] for t in total])
+
+            sumdlf = 0.0
+            for t in total:
+                sumdlf += sumdl / t[0] # will go wrong in the very theoretical case that point.xy == cpt or borehole.xy
+
+            for t in total:
+                t[0] = int(round((sumdl / t[0]) / sumdlf * 100, 0))
+
+            # make sure the sum is 100, note that 99 and 101 might be possible but not more / less than that, no check however
+            sumt = sum(t[0] for t in total)
+            if sumt > 100: # subtract difference from highest value
+                total[total.index(max(total))][0] = total[total.index(max(total))][0] - (sumt - 100)
+            if sumt < 100: # add difference to lowest value
+                total[total.index(min(total))][0] = total[total.index(min(total))][0] + (100 - sumt)
+
+            # TODO > hier verder
+    
     def execute(self, plot_map_path="") -> Geoprofile:
         cptsforplot = []
         boreholesforplot = []
@@ -175,7 +240,6 @@ class GeoProfileCreator(BaseModel):
                 )
                 soilprofile._merge() # this prevents from adding boreholelayers < DEFAULT_MINIMUM_LAYERHEIGHT
                 result.soilprofiles.append(soilprofile)
-
 
         result.merge()
 

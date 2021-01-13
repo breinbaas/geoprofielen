@@ -57,6 +57,11 @@ class Borehole(BaseModel):
         else:
             raise ValueError("This geffile has no date or invalid date information.")
 
+    
+    @property
+    def length(self) -> float:
+        return self.z_top - self.z_min    
+    
     @property
     def z_min(self) -> float:
         """
