@@ -6,6 +6,9 @@ DEFAULT_CHAINAGE_STEP = 10 # stapgrootte tussen punten op de referentielijn om t
 
 MAX_CPT_DISTANCE = 100 # maximale afstand tussen RD punt en sondering
 MAX_BOREHOLE_DISTANCE = 100 # maximale afstand tussen RD punt en boring
+MIN_PROBABILISTIC_SOILPROFILE_LENGTH = 100 # de minimale lengte van een probabilistisch stuk dijktraject
+MIN_PROBABILISTIC_CPT_BOREHOLE_LENGTH = 7 # de minimale lengte van de boring of sondering om in een prob model te worden meegenomen
+NUM_PROB_SOILINVESTIGATIONS = 5 # aantal verschillende grondopbouwen voor een prob benadering
 
 HDSR_SOIL_COLORS = { # kleuren die gekoppeld zijn aan de HDSR grondsoorten
     "klei_siltig":"#75923c",

@@ -56,7 +56,8 @@ def test_main():
         
         geoprofilecreator.dijktraject = dijktraject
         try:
-            geoprofile = geoprofilecreator.execute()
+            #geoprofile = geoprofilecreator.execute()
+            geoprofile = geoprofilecreator.execute_prob()
             if len(geoprofile.soilprofiles) == 0: continue
             
             geoprofile.plot(str(p / f"{dtcode}.png"))
