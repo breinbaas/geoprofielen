@@ -28,3 +28,8 @@ def test_plot():
     cpt.read("./tests/testdata/in/cpt.gef")
     cpt.convert()
     cpt.plot(filepath="./tests/testdata/out")
+
+def test_pre_excavated_depth():
+    cpt = CPT()
+    cpt.read("./tests/testdata/in/cpt_preexcavated_depth.gef")
+    assert cpt.pre_excavated_depth == 2.0

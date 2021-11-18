@@ -20,6 +20,8 @@ import math
 
 from enum import IntEnum
 
+from pydantic.utils import KeyType
+
 from .soillayer import SoilLayer
 from ..settings import HDSR_SOIL_COLORS, DEFAULT_MINIMUM_LAYERHEIGHT
 
@@ -72,6 +74,8 @@ class CPT(BaseModel):
 
     soillayers: List[SoilLayer] = []
     filename: str = ""
+
+    pre_excavated_depth: float = 0.0
 
     @classmethod
     def from_file(self, filename: str) -> 'CPT':
@@ -218,13 +222,19 @@ class CPT(BaseModel):
             try:
                 self.x = round(float(args[1].strip()), 2)
                 self.y = round(float(args[2].strip()), 2)
-            except:
+            except Exception as e:
                 raise ValueError(f"Error reading xyid '{line}' -> error {e}")
         elif keyword == "ZID":
             try:
                 self.z_top = float(args[1].strip())
-            except:
+            except Exception as e:
                 raise ValueError(f"Error reading zid '{line}' -> error {e}")     
+        elif keyword == "MEASUREMENTVAR":
+            if args[0] == '13':
+                try:
+                    self.pre_excavated_depth = float(args[1])
+                except Exception as e:
+                    raise ValueError(f"Invalid pre-excavated depth found in line '{line}'. Got error '{e}'")        
         elif keyword == "COLUMNVOID":
             try:
                 col = int(args[0].strip())
